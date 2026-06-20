@@ -37,7 +37,7 @@
 // ============================================
 // TODO: Create variable to store current quiz
 // ============================================
-// let currentQuiz = null;
+let currentQuiz = null;
 
 // ============================================
 // TODO: Create showLoading() function
@@ -171,7 +171,7 @@ MainBtn.addEventListener("click", function () {
   app_container.classList.remove("app-container");
 
   userData();
-  getapi();
+  // getapi();
 });
 
 function getapi() {
