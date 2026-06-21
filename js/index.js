@@ -37,7 +37,7 @@
 // ============================================
 // TODO: Create variable to store current quiz
 // ============================================
-let currentQuiz = null;
+let objQuiz = null;
 
 // ============================================
 // TODO: Create showLoading() function
@@ -111,7 +111,11 @@ let currentQuiz = null;
 // ============================================
 // 1. startQuizBtn click -> call startQuiz()
 // 2. questionsNumber keydown -> if Enter, call startQuiz()
-import {Quiz } from "./quiz.js";
+
+
+import { Quiz } from "./quiz.js";
+import { Question } from "./question.js";
+
 const MainForm = document.getElementById("quizOptions");
 const PlayerName = document.getElementById("playerName");
 const category = document.getElementById("categoryMenu");
@@ -128,59 +132,39 @@ const LoadindDesign = document.querySelector(".loading-overlay");
 const xp_value = document.querySelector(".xp-value");
 const errorApi = document.querySelector(".error-card");
 
- const categoryMapping = {
-  21: "Sports",
-  9: "General Knowledge",
-  18: "Computers",
-  23: "History",
-  17: "Science",
-};
-
 
 
 let timeLeft = 15;
 let timeId = null;
-let res ;
+let res;
 let QuestionIndex = 0;
-const firstBox = document.querySelector('.answer-text1');
-const secondBox = document.querySelector('.answer-text2');
-const thirdBox = document.querySelector('.answer-text3');
-const fourthBox = document.querySelector('.answer-text4');
+
+const firstBox = document.querySelector(".answer-text1");
+const secondBox = document.querySelector(".answer-text2");
+const thirdBox = document.querySelector(".answer-text3");
+const fourthBox = document.querySelector(".answer-text4");
 
 const MainBtn = document.getElementById("startQuiz");
+
 let obj = {};
+
 function userData() {
   obj = {
-    user: PlayerName.value,
+    user: PlayerName.value || "Player",
     categ: category.value,
     level: DifficultyLevel.value,
     number: questionsNumber.value,
   };
-
-  
-let objQuiz = new Quiz(category.value , "easy" , 5 , "hosam");
-const url = objQuiz.buildApiUrl(obj.number , obj.level, category.value);
-console.log(url);
-objQuiz.getQuestions(url);
-// console.log('55555555555555', objQuiz.getQuestions());
-
 }
 
 MainBtn.addEventListener("click", function () {
-  MainForm.classList.add("my-display");
-  app_container.classList.remove("app-container");
-
-  userData();
-  // getapi();
+  startQuiz();
 });
 
 function getapi() {
-   if (res == undefined ) {
-    LoadindDesign.classList.remove("hidden")
-   } 
-
- 
-
+  if (res == undefined) {
+    
+  }
   return new Promise(function (resolved, rejected) {
     let xhr = new XMLHttpRequest();
     xhr.open(
@@ -200,13 +184,12 @@ function getapi() {
       }
       resolved();
     });
- 
 
     xhr.addEventListener("error", function () {
-          if(res == null){
-     LoadindDesign.classList.add("hidden");
+      if (res == null) {
+        LoadindDesign.classList.add("hidden");
         errorApi.classList.remove("hidden");
-   }
+      }
       console.log("error in api");
       rejected();
     });
@@ -214,16 +197,15 @@ function getapi() {
 }
 
 function displayInform(results) {
-  QuestionIndex++
-  xp_value.innerHTML=`Question${QuestionIndex}/${res.results.length} `
+  objQuiz.currentQuestionIndex++;
+  xp_value.innerHTML = `Question${objQuiz.currentQuestionIndex}/${res.results.length} `;
 
   CategoryRead.innerHTML = categoryMapping[obj.categ];
   level.innerHTML = obj.level;
   numberQues.innerHTML = `1/ ${results.length}`;
   question_text.innerHTML = ` ${results[0].question} `;
- QuestionAnswer(results);
-  startQuestionTimer();
-  
+  // QuestionAnswer(results);
+  // startQuestionTimer();
 }
 
 function startQuestionTimer() {
@@ -235,7 +217,6 @@ function startQuestionTimer() {
       clearInterval(timeId);
       QuestionIndex = QuestionIndex + 1;
       moveToNextQuestion(QuestionIndex);
-      
     }
   }, 1000);
 }
@@ -243,19 +224,43 @@ function startQuestionTimer() {
 function moveToNextQuestion(index) {
   question_text.innerHTML = ` ${res.results[1].question} `;
   numberQues.innerHTML = `${index}/${res.results.length}`;
-  xp_value.innerHTML=`Question${index }/${res.results.length} `
+  xp_value.innerHTML = `Question${index}/${res.results.length} `;
   console.log(res);
 }
 
 function QuestionAnswer(res) {
-firstBox.innerHTML=`${res[0].correct_answer}`
+  firstBox.innerHTML = `${res[0].correct_answer}`;
 
-for (let i = 0; i < res[0].incorrect_answers.length; i++) {
-console.log(i);
- let rand = Math.floor(Math.random() * i)
-console.log(rand); 
-secondBox.innerHTML=`${res[0].incorrect_answers[0]}`
-thirdBox.innerHTML=`${res[0].incorrect_answers[1]}`
-fourthBox.innerHTML=`${res[0].incorrect_answers[2]}`
+  for (let i = 0; i < res[0].incorrect_answers.length; i++) {
+    console.log(i);
+    let rand = Math.floor(Math.random() * i);
+    console.log(rand);
+    secondBox.innerHTML = `${res[0].incorrect_answers[0]}`;
+    thirdBox.innerHTML = `${res[0].incorrect_answers[1]}`;
+    fourthBox.innerHTML = `${res[0].incorrect_answers[2]}`;
+  }
 }
+
+async function startQuiz() {
+  userData();
+
+  objQuiz = new Quiz(obj.categ, obj.level, obj.number, obj.PlayerName);
+
+  MainForm.classList.add("my-display");
+  app_container.classList.remove("app-container");
+  LoadindDesign.classList.remove("hidden");
+
+  const url = objQuiz.buildApiUrl(obj.number, obj.level, obj.categ);
+ 
+  await objQuiz.getQuestions(url);
+
+  if (objQuiz.questions.length) {
+    questionsDisplay.classList.remove("my-display");
+    LoadindDesign.classList.add("hidden");
+    
+    const firstQuestion = new Question(objQuiz, questionsDisplay, () => {});
+    firstQuestion.displayQuestion();
+
+  }
+
 }

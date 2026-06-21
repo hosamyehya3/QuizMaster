@@ -68,7 +68,7 @@ export class Quiz {
   }
 
   getCurrentQuestion() {
-    if (currentQuestionIndex < this.questions.length) {
+    if (this.currentQuestionIndex < this.questions.length) {
       return this.questions[this.currentQuestionIndex];
     } else {
       return null;

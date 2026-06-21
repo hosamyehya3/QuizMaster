@@ -53,7 +53,15 @@
  * }
  */
 
-export default class Question {
+const categoryMapping = {
+  21: "Sports",
+  9: "General Knowledge",
+  18: "Computers",
+  23: "History",
+  17: "Science",
+};
+
+export class Question {
   questionData = {};
   index = 0;
   question = "";
@@ -62,13 +70,19 @@ export default class Question {
   wrongAnswers = [];
   allAnswers = [];
   answered = false;
-  timerInterval = null;
-  
+  timerInterval = 0;
+  timeRemaining = 0;
+
+  xp_value = document.querySelector(".xp-value");
+  CategoryRead = document.getElementById("CategoryRead");
+  level = document.getElementById("level");
+  numberQues = document.getElementById("numberQues");
+  question_text = document.querySelector(".question-text");
+
   constructor(quiz, container, onQuizEnd) {
     this.quiz = quiz;
     this.container = container;
     this.onQuizEnd = onQuizEnd;
-
     this.questionData = quiz.getCurrentQuestion();
     this.index = quiz.currentQuestionIndex;
   }
@@ -101,6 +115,19 @@ export default class Question {
   // 4. Call this.addEventListeners()
   // 5. Call this.startTimer()
 
+  displayQuestion() {
+    console.log("55555555", this.questionData);
+    // this.xp_value.innerHTML = `Question${this.index++}/${this.quiz.questions.length} `;
+
+    // this.CategoryRead.innerHTML = categoryMapping[obj.categ];
+    // this.level.innerHTML = obj.level;
+    // this.numberQues.innerHTML = `1/ ${results.length}`;
+
+    if (this.questionData !== null) {
+      this.question_text.innerHTML = ` ${this.questionData.question} `;
+    }
+  }
+
   // TODO: Create addEventListeners() method
   // 1. Get all answer buttons: document.querySelectorAll('.answer-btn')
   // 2. Add click event to each: call this.checkAnswer(button)
@@ -118,9 +145,26 @@ export default class Question {
   // 5. If timeRemaining <= 10 seconds, add 'warning' class
   // 6. If timeRemaining <= 0, call stopTimer() and handleTimeUp()
 
+  startTimer() {
+    const timer = document.querySelector(".timer-value");
+    setInterval(() => {
+      timeRemaining--;
+      timer.innerHTML = `${timeRemaining}`;
+      if (timeRemaining <= 0) {
+        this.stopTimer();
+       
+        // QuestionIndex = QuestionIndex + 1;
+        // moveToNextQuestion(QuestionIndex);
+      }
+    }, 1000);
+  }
   // TODO: Create stopTimer() method
   // Use clearInterval(this.timerInterval)
 
+  stopTimer() {
+    clearInterval(this.timerInterval);
+  }
+  
   // TODO: Create handleTimeUp() method
   // 1. Set answered = true
   // 2. Call removeEventListeners()
